@@ -34,22 +34,22 @@
 
     <div class="cov-levels">
       <div class="cov-card" style="border-left:3px solid #3dd68c">
-        <div class="cov-num" style="color:#3dd68c">312</div>
+        <div class="cov-num" style="color:#3dd68c" id="cov-high">-</div>
         <div class="cov-label">High Coverage</div>
         <div class="cov-desc">100+ routes serve this stop. Major hubs like Kempegowda, KR Market.</div>
       </div>
       <div class="cov-card" style="border-left:3px solid #6eb5ff">
-        <div class="cov-num" style="color:#6eb5ff">489</div>
+        <div class="cov-num" style="color:#6eb5ff" id="cov-moderate">-</div>
         <div class="cov-label">Moderate Coverage</div>
         <div class="cov-desc">20–99 routes. Well-served neighbourhood stops.</div>
       </div>
       <div class="cov-card" style="border-left:3px solid #f7c948">
-        <div class="cov-num" style="color:#f7c948">876</div>
+        <div class="cov-num" style="color:#f7c948" id="cov-low">-</div>
         <div class="cov-label">Low Coverage</div>
         <div class="cov-desc">5–19 routes. Functional but limited alternatives.</div>
       </div>
       <div class="cov-card" style="border-left:3px solid #ff6b6b">
-        <div class="cov-num" style="color:#ff6b6b">798</div>
+        <div class="cov-num" style="color:#ff6b6b" id="cov-underserved">-</div>
         <div class="cov-label">Underserved</div>
         <div class="cov-desc">Only 1 route. Zero alternatives for residents.</div>
       </div>
@@ -73,8 +73,9 @@
           <p style="font-size:13px;color:var(--muted);line-height:1.8">
             The top 2 hubs — <strong style="color:var(--text)">Kempegowda Bus Station</strong> and
             <strong style="color:var(--text)">Krishnarajendra Market</strong> — together serve
-            <strong style="color:var(--accent)">2,032 routes</strong>, nearly 48% of the entire network.
-            Meanwhile, 798 stops are reachable by exactly one route.
+            <strong style="color:var(--accent)" id="insight-hub-routes">-</strong> routes, nearly
+            <span id="insight-hub-pct">-</span>% of the entire network.
+            Meanwhile, <span id="insight-underserved-count">-</span> stops are reachable by exactly one route.
           </p>
           <br/>
           <p style="font-size:13px;color:var(--muted);line-height:1.8">
@@ -87,23 +88,23 @@
             <div>
               <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Top 2 hubs share of network</div>
               <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
-                <div style="width:48%;height:100%;background:var(--accent);border-radius:4px"></div>
+                <div id="bar-hub-pct" style="width:0%;height:100%;background:var(--accent);border-radius:4px"></div>
               </div>
-              <div style="font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:4px">48%</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:4px" id="label-hub-pct">-</div>
             </div>
             <div>
               <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Underserved stops share</div>
               <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
-                <div style="width:32%;height:100%;background:var(--red);border-radius:4px"></div>
+                <div id="bar-underserved-pct" style="width:0%;height:100%;background:var(--red);border-radius:4px"></div>
               </div>
-              <div style="font-family:var(--mono);font-size:12px;color:var(--red);margin-top:4px">32% of all stops</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--red);margin-top:4px" id="label-underserved-pct">-</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:4px">East zone route deficit</div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:4px">East zone route count vs South</div>
               <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
-                <div style="width:22%;height:100%;background:var(--blue);border-radius:4px"></div>
+                <div id="bar-zone-deficit" style="width:0%;height:100%;background:var(--blue);border-radius:4px"></div>
               </div>
-              <div style="font-family:var(--mono);font-size:12px;color:var(--blue);margin-top:4px">229 vs 328 in South</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--blue);margin-top:4px" id="label-zone-deficit">-</div>
             </div>
           </div>
         </div>
@@ -126,6 +127,27 @@ document.getElementById('hub-bars').innerHTML = DATA.top_hubs.map(h => `
     <div class="bar-meta"><span class="bar-name">${h.name}</span><span class="bar-val">${h.routes}</span></div>
     <div class="bar-track"><div class="bar-fill" style="width:${h.routes/maxH*100}%;background:var(--blue)"></div></div>
   </div>`).join('');
+
+// KPI cards — real counts from DATA.coverage (was hardcoded before)
+document.getElementById('cov-high').textContent        = DATA.coverage.High.count.toLocaleString();
+document.getElementById('cov-moderate').textContent     = DATA.coverage.Moderate.count.toLocaleString();
+document.getElementById('cov-low').textContent          = DATA.coverage.Low.count.toLocaleString();
+document.getElementById('cov-underserved').textContent  = DATA.coverage.Underserved.count.toLocaleString();
+
+// Insight section — real stats from DATA (was hardcoded before)
+document.getElementById('insight-hub-routes').textContent      = DATA.top2_hub_routes.toLocaleString();
+document.getElementById('insight-hub-pct').textContent         = DATA.top2_hub_share_pct;
+document.getElementById('insight-underserved-count').textContent = DATA.coverage.Underserved.count.toLocaleString();
+
+document.getElementById('bar-hub-pct').style.width = DATA.top2_hub_share_pct + '%';
+document.getElementById('label-hub-pct').textContent = DATA.top2_hub_share_pct + '%';
+
+document.getElementById('bar-underserved-pct').style.width = DATA.underserved_share_pct + '%';
+document.getElementById('label-underserved-pct').textContent = DATA.underserved_share_pct + '% of all stops';
+
+const east = DATA.zones.East, south = DATA.zones.South;
+document.getElementById('bar-zone-deficit').style.width = Math.round(east / south * 100) + '%';
+document.getElementById('label-zone-deficit').textContent = `${east} vs ${south} in South`;
 </script>
 </body>
 </html>

@@ -26,17 +26,17 @@
     <div class="subpage-head">
       <h1>ANOMALY DETECTION</h1>
       <p>Isolation Forest highlights statistically unusual BMTC routes.</p>
-      <span class="subpage-status danger">214 routes flagged</span>
+      <span class="subpage-status danger" id="anom-status">- routes flagged</span>
     </div>
   </section>
 
   <section class="content futuristic-content">
 
     <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(255,107,107,.12);color:#ff6b6b">⚠</div><div><div class="kpi-num">214</div><div class="kpi-label">Anomalous routes</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(247,201,72,.12);color:#f7c948">%</div><div><div class="kpi-num">5%</div><div class="kpi-label">Contamination rate</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(110,181,255,.12);color:#6eb5ff">V</div><div><div class="kpi-num">Volvo</div><div class="kpi-label">Most flagged type</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(61,214,140,.12);color:#3dd68c">C</div><div><div class="kpi-num">Central</div><div class="kpi-label">Most flagged zone</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(255,107,107,.12);color:#ff6b6b">⚠</div><div><div class="kpi-num" id="kpi-anom-count">-</div><div class="kpi-label">Anomalous routes</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(247,201,72,.12);color:#f7c948">%</div><div><div class="kpi-num" id="kpi-contamination">-</div><div class="kpi-label">Contamination rate</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(110,181,255,.12);color:#6eb5ff">V</div><div><div class="kpi-num" id="kpi-top-type">-</div><div class="kpi-label">Most flagged type</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(61,214,140,.12);color:#3dd68c">Z</div><div><div class="kpi-num" id="kpi-top-zone">-</div><div class="kpi-label">Most flagged zone</div></div></div>
     </div>
 
     <div class="card">
@@ -65,7 +65,7 @@
     <div class="card">
       <div class="card-header">
         <h3>Flagged routes</h3>
-        <span class="card-tag">214 total — showing 8</span>
+        <span class="card-tag" id="anom-total-tag">- total — showing 8</span>
       </div>
       <div id="anom-list"></div>
     </div>
@@ -74,6 +74,14 @@
 </main>
 <script src="data.js"></script>
 <script>
+// Real values from DATA — were hardcoded "214" / "5%" / "Volvo" / "Central" before.
+document.getElementById('anom-status').textContent      = `${DATA.anomaly_count} routes flagged`;
+document.getElementById('anom-total-tag').textContent    = `${DATA.anomaly_count} total — showing 8`;
+document.getElementById('kpi-anom-count').textContent    = DATA.anomaly_count.toLocaleString();
+document.getElementById('kpi-contamination').textContent = DATA.contamination_pct + '%';
+document.getElementById('kpi-top-type').textContent      = DATA.most_flagged_type;
+document.getElementById('kpi-top-zone').textContent      = DATA.most_flagged_zone;
+
 const zoneBadge = z => {
   const map = { Central:'badge-yellow', North:'badge-blue', South:'badge-green', East:'badge-red', West:'badge-purple', Other:'badge-gray' };
   return `<span class="badge ${map[z]||'badge-gray'}">${z}</span>`;

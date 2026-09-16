@@ -38,13 +38,44 @@ plt.close()
 kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
 routes['cluster'] = kmeans.fit_predict(X_scaled)
 
+# Label clusters from their actual contents rather than assuming KMeans always
+# assigns IDs 0-3 in the same semantic order. random_state=42 makes IDs
+# deterministic for a FIXED input, but if the upstream data changes (e.g. a
+# zone-classification fix shifts which routes are Central vs peripheral),
+# cluster 0 is no longer guaranteed to be "Peripheral Special Routes" — a
+# hardcoded {0: '...'} map would then mislabel silently. This inspects each
+# cluster's real top zone/type/hub and builds a descriptive name from that.
+def name_cluster(cluster_id, group):
+    top_zone = group['zone'].mode()[0]
+    top_type = group['route_type_label'].mode()[0]
+    premium_share = group['is_premium'].mean()
+    avg_freq = group['origin_freq'].mean()
+
+    # Special-case: a cluster dominated by one non-mega-hub origin (e.g. a
+    # secondary bus station) is a "corridor" cluster in its own right.
+    hub_counts = group['origin'].value_counts()
+    top_hub = hub_counts.index[0] if len(hub_counts) else None
+    top_hub_share = hub_counts.iloc[0] / len(group) if len(hub_counts) else 0
+    MEGA_HUBS = ('Kempegowda Bus Station', 'Krishnarajendra Market')
+
+    if top_hub and top_hub_share > 0.5 and top_hub not in MEGA_HUBS:
+        return f'{top_hub} Corridor'
+    if premium_share > 0.5:
+        return 'Premium Service Routes'
+    if top_zone == 'Central':
+        # Two Central-dominant clusters can differ a lot in whether they
+        # actually run through Kempegowda/KR Market (high origin_freq) or
+        # just terminate somewhere central without passing through the
+        # mega-hubs (low origin_freq) — origin_freq is what tells them apart.
+        return 'Central Mega-Hub Routes' if avg_freq > 300 else 'Central Secondary Routes'
+    return f'Peripheral {top_type} Routes'
+
 cluster_labels = {
-    0: 'Peripheral Special Routes',
-    1: 'Central Ordinary Routes',
-    2: 'Central Variant Routes',
-    3: 'Shivajinagar Corridor'
+    cid: name_cluster(cid, group)
+    for cid, group in routes.groupby('cluster')
 }
 routes['cluster_label'] = routes['cluster'].map(cluster_labels)
+print('Cluster labels (derived from data, not hardcoded):', cluster_labels)
 
 pca = PCA(n_components=2)
 X_pca = pca.fit_transform(X_scaled)

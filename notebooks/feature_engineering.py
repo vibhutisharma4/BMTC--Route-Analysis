@@ -16,9 +16,13 @@ routes['max_stop_freq'] = routes[['origin_freq', 'dest_freq']].max(axis=1)
 routes['min_stop_freq'] = routes[['origin_freq', 'dest_freq']].min(axis=1)
 
 def coverage_level(freq):
+    # Underserved now means EXACTLY 1 route (freq < 2) — matches coverage.html's
+    # description "Only 1 route. Zero alternatives for residents." Before,
+    # this bucket included freq 1-4, so a stop with 4 routes was being called
+    # "zero alternatives," which contradicted the page's own text.
     if freq >= 100: return 'High'
     if freq >= 20:  return 'Moderate'
-    if freq >= 5:   return 'Low'
+    if freq >= 2:   return 'Low'
     return 'Underserved'
 
 routes['coverage_level'] = routes['min_stop_freq'].apply(coverage_level)

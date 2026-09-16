@@ -23,12 +23,18 @@ print(routes[routes['is_anomaly'] == 1][
     ['route_id', 'route_long_name', 'zone', 'route_type_label', 'origin_freq']
 ].head(10).to_string())
 
-G = nx.Graph()
+# MultiGraph, not Graph: multiple routes can share the same origin/destination
+# pair (e.g. two different route_ids both running "Kempegowda - Whitefield").
+# A plain Graph silently overwrites the earlier edge on add_edge(), so edge
+# count stops equalling route count and route_id data gets lost. MultiGraph
+# keeps every route as its own edge.
+G = nx.MultiGraph()
 for _, row in routes.dropna(subset=['origin', 'destination']).iterrows():
     if row['origin'] != row['destination']:
         G.add_edge(row['origin'], row['destination'], route_id=row['route_id'])
 
 print(f'Nodes: {G.number_of_nodes()}, Edges: {G.number_of_edges()}')
+print(f'(Edges should be close to len(routes) minus circular routes: {len(routes[routes["is_circular"]==0])})')
 
 pr = nx.pagerank(G, alpha=0.85)
 pr_df = pd.DataFrame(list(pr.items()), columns=['stop', 'pagerank'])

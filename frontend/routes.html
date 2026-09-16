@@ -93,16 +93,9 @@ function filterType(t, el) {
   el.classList.add('active');
 }
 
-// Zone x Type matrix (approximate breakdown)
-const matrixData = [
-  { zone:'Central', ord:520, var:410, spe:890, exp:180, prem:196, total:2196 },
-  { zone:'South',   ord:120, var:105, spe:72,  exp:21,  prem:10,  total:328  },
-  { zone:'North',   ord:110, var:85,  spe:65,  exp:18,  prem:7,   total:285  },
-  { zone:'East',    ord:85,  var:70,  spe:52,  exp:12,  prem:10,  total:229  },
-  { zone:'West',    ord:70,  var:60,  spe:38,  exp:9,   prem:8,   total:185  },
-  { zone:'Other',   ord:339, var:376, spe:453, exp:4,   prem:0,   total:1048 },
-];
-document.getElementById('matrix-body').innerHTML = matrixData.map(r => `
+// Zone x Type matrix — now real, generated from routes_final.csv by
+// generate_dashboard_data.py (was previously a hand-typed approximation).
+document.getElementById('matrix-body').innerHTML = DATA.zone_type_matrix.map(r => `
   <tr>
     <td><span class="badge" style="background:${DATA.zone_colors[r.zone]}22;color:${DATA.zone_colors[r.zone]}">${r.zone}</span></td>
     <td class="mono">${r.ord}</td><td class="mono">${r.var}</td>
@@ -111,17 +104,8 @@ document.getElementById('matrix-body').innerHTML = matrixData.map(r => `
     <td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${r.total.toLocaleString()}</td>
   </tr>`).join('');
 
-// Circular routes sample
-const circSamples = [
-  'Shanthinagar Bus Stand - Shanthinagar Bus Stand',
-  'Borewell - Borewell',
-  'Jalahalli Cross - Jalahalli Cross',
-  'Banashankari Bus Station - Banashankari Bus Station',
-  'Yeshwanthpura TTMC - Yeshwanthpura TTMC',
-  'Hebbal - Hebbal',
-  'Basavangudi - Basavangudi',
-];
-document.getElementById('circular-list').innerHTML = circSamples.map(name => `
+// Circular routes sample — real random sample from routes_final.csv, not hand-typed.
+document.getElementById('circular-list').innerHTML = DATA.circular_samples.map(name => `
   <div class="bar-item">
     <div class="bar-meta"><span class="bar-name">${name}</span><span class="badge badge-purple">circular</span></div>
     <div class="bar-track"><div class="bar-fill" style="width:100%;background:#b48eff44"></div></div>

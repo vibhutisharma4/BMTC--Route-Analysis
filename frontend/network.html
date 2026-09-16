@@ -33,8 +33,8 @@
   <section class="content futuristic-content">
 
     <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(110,181,255,.12);color:#6eb5ff">◎</div><div><div class="kpi-num">~2,400</div><div class="kpi-label">Graph nodes (stops)</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(247,201,72,.12);color:#f7c948">—</div><div><div class="kpi-num">~4,157</div><div class="kpi-label">Graph edges (routes)</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(110,181,255,.12);color:#6eb5ff">◎</div><div><div class="kpi-num" id="kpi-nodes">-</div><div class="kpi-label">Graph nodes (stops)</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(247,201,72,.12);color:#f7c948">—</div><div><div class="kpi-num" id="kpi-edges">-</div><div class="kpi-label">Graph edges (routes)</div></div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(61,214,140,.12);color:#3dd68c">★</div><div><div class="kpi-num">0.85</div><div class="kpi-label">PageRank alpha</div></div></div>
     </div>
 
@@ -44,7 +44,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><h3>Hub criticality bars</h3><span class="card-tag">Route count proxy</span></div>
+      <div class="card-header"><h3>Hub criticality bars</h3><span class="card-tag">Ranked by PageRank</span></div>
       <div class="bar-list" id="hub-bars"></div>
     </div>
 
@@ -66,23 +66,31 @@
 </main>
 <script src="data.js"></script>
 <script>
-document.getElementById('hub-grid').innerHTML = DATA.top_hubs.map((h,i)=>`
+// Ranked by real PageRank centrality (was ranked by raw route count before,
+// which gave a different — less meaningful — order; e.g. Kadugodi outranks
+// Banashankari Bus Station in PageRank despite having fewer routes, because
+// PageRank weighs which stops you connect to, not just how many routes you have).
+document.getElementById('hub-grid').innerHTML = DATA.pagerank_hubs.slice(0,12).map((h,i)=>`
   <div class="hub-card">
     <div class="hub-rank">#${i+1}</div>
     <div class="hub-name">${h.name}</div>
     <div class="hub-count">${h.routes.toLocaleString()}</div>
-    <div class="hub-label">routes</div>
+    <div class="hub-label">routes · PR ${h.pagerank}</div>
   </div>`).join('');
 
-const maxH = DATA.top_hubs[0].routes;
-document.getElementById('hub-bars').innerHTML = DATA.top_hubs.map((h,i)=>`
+// Real graph stats from DATA (were hardcoded "~2,400" / "~4,157" before)
+document.getElementById('kpi-nodes').textContent = DATA.graph_nodes.toLocaleString();
+document.getElementById('kpi-edges').textContent = DATA.graph_edges.toLocaleString();
+
+const maxPR = DATA.pagerank_hubs[0].pagerank;
+document.getElementById('hub-bars').innerHTML = DATA.pagerank_hubs.slice(0,12).map((h,i)=>`
   <div class="bar-item">
     <div class="bar-meta">
       <span class="bar-name">#${i+1} ${h.name}</span>
-      <span class="bar-val">${h.routes.toLocaleString()}</span>
+      <span class="bar-val">PR ${h.pagerank} · ${h.routes.toLocaleString()} routes</span>
     </div>
     <div class="bar-track">
-      <div class="bar-fill" style="width:${h.routes/maxH*100}%;background:${i<2?'var(--accent)':'var(--blue)'}"></div>
+      <div class="bar-fill" style="width:${h.pagerank/maxPR*100}%;background:${i<2?'var(--accent)':'var(--blue)'}"></div>
     </div>
   </div>`).join('');
 </script>

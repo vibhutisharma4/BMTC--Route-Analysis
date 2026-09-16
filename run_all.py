@@ -7,6 +7,7 @@ scripts = [
     'notebooks/feature_engineering.py',
     'notebooks/clustering.py',
     'notebooks/anamoly_network.py',
+    'notebooks/generate_dashboard_data.py',  # writes dashboard/data.js from real output
 ]
 
 for script in scripts:
